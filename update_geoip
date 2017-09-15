@@ -1,0 +1,23 @@
+#!/usr/bin/env bash
+
+# This script updates the GeoIPLite database from MaxMind.
+#
+# @author danielmoffat
+
+GEOIP_CONF="/var/everyclick/scripts/geoip/geoip.conf"
+GEOIP_DIR="/var/everyclick/efs/geoip/"
+GEOIP_LOG="$HOME/tmp/geoipupdate.log"
+
+geoipupdate -v -f $GEOIP_CONF > $GEOIP_LOG 2>&1
+
+# Exit code of the previous command
+update_result="$?"
+
+# Check if the update succeeded
+if ! test $update_result -eq 0; then
+  echo "The update failed."
+else
+  echo "The update was OK."
+fi
+
+

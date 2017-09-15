@@ -1,0 +1,46 @@
+#!/usr/bin/env bash
+
+# Installs the GeoIPLite database from MaxMind.
+#
+# What?
+# ---
+# GeoIPLite is an open-source database that contains mappings of IP addresses -> locations, Allowing you to look up an IP and
+# get its geographical location.
+#
+# All database data lives on the shared drive so that it's accessible from both of the web servers.
+#
+# @author danielmoffat
+
+GEOIP_DIR="/var/everyclick/efs/geoip/"
+GEOIP_DB_DIR="$GEOIP_DIR/db/"
+GEOIP_LOG="$HOME/tmp/geoipupdate.log"
+
+## This software is required, openssl-devel and curl-devel are also required, but I couldn't find a way to
+## see if the development version of these tools was available, so they get installed every time.
+DEPENDENCIES=("gcc" "make" "openssl-devel" "git" "autoconf" "automake" "libtool" "curl-devel")
+
+for dependency in "${DEPENDENCIES[@]}"; do
+  if [[ ! $(type -P "$dependency") ]]; then
+    sudo yum -y install $dependency	  
+  fi
+done
+
+## Create the data directories
+if [[ ! -d "$GEOIP_DB_DIR" ]]; then
+    mkdir -p "$GEOIP_DB_DIR"
+fi
+
+## Install and build the software from source if not installed already
+if [[ ! $(type -P "geoipupdate") ]]; then
+  git clone https://github.com/maxmind/geoipupdate
+  cd geoipupdate
+  ./bootstrap
+  ./configure
+  make
+  sudo make install
+  cd ..
+  rm -rf "geoipupdate"
+fi
+
+## Run the initial load, this will populate the database
+./update_geoip
