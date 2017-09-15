@@ -4,6 +4,8 @@
 #
 # @author danielmoffat
 
+export PATH="/usr/local/bin":$PATH
+
 GEOIP_CONF="/var/everyclick/scripts/geoip/geoip.conf"
 GEOIP_DIR="/var/everyclick/efs/geoip/"
 GEOIP_LOG="$HOME/tmp/geoipupdate.log"
@@ -15,9 +17,5 @@ update_result="$?"
 
 # Check if the update succeeded
 if ! test $update_result -eq 0; then
-  echo "The update failed."
-else
-  echo "The update was OK."
+  mutt -s "GeoIP database update failed." daniel@everyclick.com < $GEOIP_LOG
 fi
-
-
